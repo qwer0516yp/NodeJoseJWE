@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 # Generated RSA key (contains private material)
 rsa-key.json
+*Private.json
