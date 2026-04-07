@@ -1,0 +1,15 @@
+{
+  "name": "adoring-stonebraker",
+  "version": "1.0.0",
+  "description": "A small piece of script using node-jose to deal with JWE content",
+  "main": "jwe.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-jose": "^2.2.0"
+  }
+}
