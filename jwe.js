@@ -1,7 +1,7 @@
 // JWE encrypt/decrypt using node-jose
 // Usage:
 //   node jwe.js genkey [alg]                              (default alg=RSA1_5)
-//   node jwe.js encrypt <text> [alg] [enc]                (defaults: RSA1_5, A128CBC-HS256)
+//   node jwe.js encrypt <text|@file|-> [alg] [enc]        (defaults: RSA1_5, A128CBC-HS256; - reads stdin)
 //   node jwe.js decrypt <jwe>
 
 const fs = require('fs');
@@ -42,12 +42,24 @@ async function decrypt(jwe) {
     if (cmd === 'genkey') {
       await loadOrCreateKey(rest[0] || DEFAULT_ALG);
     } else if (cmd === 'encrypt') {
-      const [text, alg = DEFAULT_ALG, enc = DEFAULT_ENC] = rest;
+      let [text, alg = DEFAULT_ALG, enc = DEFAULT_ENC] = rest;
       if (!text) throw new Error('missing <text>');
+      if (text === '-') {
+        text = fs.readFileSync(0, 'utf8');
+      } else if (text.startsWith('@')) {
+        text = fs.readFileSync(text.slice(1), 'utf8');
+      }
+      // If it parses as JSON, re-serialize to a canonical compact form.
+      try { text = JSON.stringify(JSON.parse(text)); } catch {}
       console.log(await encrypt(text, alg, enc));
     } else if (cmd === 'decrypt') {
       if (!rest[0]) throw new Error('missing <jwe>');
-      console.log(await decrypt(rest[0]));
+      const out = await decrypt(rest[0]);
+      try {
+        process.stdout.write(JSON.stringify(JSON.parse(out), null, 2) + '\n');
+      } catch {
+        process.stdout.write(out + (out.endsWith('\n') ? '' : '\n'));
+      }
     } else {
       console.error('Usage:');
       console.error('  node jwe.js genkey [alg]');

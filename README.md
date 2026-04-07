@@ -20,13 +20,19 @@ Generate an RSA keypair (written to `rsa-key.json`, auto-created on first encryp
 node jwe.js genkey
 ```
 
-Encrypt a string — prints a compact JWE:
+Encrypt — prints a compact JWE. The payload can be a literal string, `@file` to
+read from a file, or `-` to read from stdin. If the input parses as JSON it is
+normalized (re-serialized compactly) before encryption:
 
 ```bash
 node jwe.js encrypt "hello world"
+node jwe.js encrypt '{"user":"alice","role":"admin"}'
+node jwe.js encrypt @payload.json
+echo '{"user":"alice"}' | node jwe.js encrypt -
 ```
 
-Decrypt a compact JWE:
+Decrypt a compact JWE. If the plaintext is valid JSON it is pretty-printed;
+otherwise it is written to stdout as-is (no quoting/escaping):
 
 ```bash
 node jwe.js decrypt "<jwe-compact-string>"
@@ -35,11 +41,14 @@ node jwe.js decrypt "<jwe-compact-string>"
 ### Example
 
 ```bash
-$ node jwe.js encrypt "hello world"
+$ node jwe.js encrypt '{"user":"alice","role":"admin"}'
 eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiLi4uIn0....
 
 $ node jwe.js decrypt "eyJhbGciOiJSU0ExXzUi...."
-hello world
+{
+  "user": "alice",
+  "role": "admin"
+}
 ```
 
 ## Notes
